@@ -1,18 +1,32 @@
 package org.xobo.toolkit;
 
-import com.bstek.dorado.data.provider.Page;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.*;
-import com.thoughtworks.paranamer.AdaptiveParanamer;
-import com.thoughtworks.paranamer.CachingParanamer;
-import com.thoughtworks.paranamer.Paranamer;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.beanutils.ConvertUtils;
 import org.springframework.util.ReflectionUtils;
 
-import java.io.IOException;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.Map.Entry;
+import com.bstek.dorado.data.provider.Page;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thoughtworks.paranamer.AdaptiveParanamer;
+import com.thoughtworks.paranamer.CachingParanamer;
+import com.thoughtworks.paranamer.Paranamer;
 
 public class MethodUtil {
   private static Paranamer paranamer = new CachingParanamer(new AdaptiveParanamer());
@@ -21,8 +35,8 @@ public class MethodUtil {
 
 
   public static void main(String[] args)
-    throws InstantiationException, IllegalAccessException, IllegalArgumentException,
-    InvocationTargetException, SecurityException, NoSuchMethodException {
+      throws InstantiationException, IllegalAccessException, IllegalArgumentException,
+      InvocationTargetException, SecurityException, NoSuchMethodException {
 
 
     Map<String, Object> parameterMap = new HashMap<String, Object>();
@@ -70,31 +84,31 @@ public class MethodUtil {
    * @throws InstantiationException
    */
   public static Object invokeMethod(Object target, String methodName, Map<String, Object> parameter)
-    throws IllegalArgumentException, IllegalAccessException, InvocationTargetException,
-    SecurityException, NoSuchMethodException, InstantiationException {
+      throws IllegalArgumentException, IllegalAccessException, InvocationTargetException,
+      SecurityException, NoSuchMethodException, InstantiationException {
     Class<?>[] paramTypes = null;
     Method method =
-      ReflectionUtils.findMethod(BeanReflectionUtil.getClass(target), methodName, paramTypes);
+        ReflectionUtils.findMethod(BeanReflectionUtil.getClass(target), methodName, paramTypes);
     return invokeMethod(target, method, parameter);
   }
 
   public static Object invokeMethod(Object target, String methodName, JsonNode rootNode) {
     return invokeMethod(BeanReflectionUtil.getClass(target), target, methodName, rootNode,
-      MATCH_BY_NAME);
+        MATCH_BY_NAME);
   }
 
   public static Object invokeMethodByOrder(Object target, String methodName, JsonNode rootNode) {
     return invokeMethod(BeanReflectionUtil.getClass(target), target, methodName, rootNode,
-      MATCH_BY_ORDER);
+        MATCH_BY_ORDER);
   }
 
   public static Object invokeMethodByOrder(Class<?> clazz, Object target, String methodName,
-    JsonNode rootNode) {
+      JsonNode rootNode) {
     return invokeMethod(clazz, target, methodName, rootNode, MATCH_BY_ORDER);
   }
 
   public static Object invokeMethod(Class<?> clazz, Object target, String methodName,
-    JsonNode rootNode, int matchType) {
+      JsonNode rootNode, int matchType) {
 
     clazz = getOriginClassProxyByDubbo(clazz);
     Class<?>[] paramTypes = null;
@@ -128,7 +142,7 @@ public class MethodUtil {
       Type ptype = parametersType[i];
       Object value;
       if (parameterNames.length == 1 && ptype instanceof Class<?>
-        && ((Class<?>) ptype).isAssignableFrom(Map.class)) {
+          && ((Class<?>) ptype).isAssignableFrom(Map.class)) {
         value = parameter;
       } else {
         value = parameter.get(name);
@@ -144,7 +158,7 @@ public class MethodUtil {
           value = ConvertUtils.convert(value, clazz);
         }
         if (!clazz.isPrimitive() && !clazz.isAssignableFrom(value.getClass())
-          && !clazz.getPackage().getName().startsWith("java") && value instanceof Map) {
+            && !clazz.getPackage().getName().startsWith("java") && value instanceof Map) {
           value = ClassUtil.create(clazz, (Map<String, Object>) value);
         } else if (Collection.class.isAssignableFrom(value.getClass())) {
           Collection<Object> newValues = new ArrayList<Object>();
@@ -177,7 +191,7 @@ public class MethodUtil {
             value = collection;
           }
         } else if (Map.class.isAssignableFrom((Class<?>) rawType)
-          && !typeArguments[1].equals(Object.class)) {
+            && !typeArguments[1].equals(Object.class)) {
           if (value instanceof Map) {
             Map<String, Object> map = (Map<String, Object>) value;
             Map<String, Object> newMap = new HashMap<String, Object>();
@@ -198,7 +212,7 @@ public class MethodUtil {
   }
 
   public static Object invokeMethod(Object target, Method method, JsonNode rootNode,
-    int matchType) {
+      int matchType) {
     String[] parameterNames = paranamer.lookupParameterNames(method);
 
     ObjectMapper mapper = new ObjectMapper();
@@ -244,7 +258,7 @@ public class MethodUtil {
   }
 
   public static Object convertJsonNodeToValueOfTargetType(ObjectMapper mapper, JsonNode valueNode,
-    Type type) throws JsonParseException, JsonMappingException, IOException {
+      Type type) throws JsonParseException, JsonMappingException, IOException {
     if (valueNode == null) {
       return null;
     }
@@ -268,16 +282,16 @@ public class MethodUtil {
           if (Collection.class.isAssignableFrom((Class<?>) rawType)) {
             if (typeArguments.length > 0) {
               JavaType javaType = mapper.getTypeFactory().constructParametrizedType(ArrayList.class,
-                List.class, rt);
+                  List.class, rt);
               value = mapper.readValue(valueNode.toString(), javaType);
             }
           } else if (Map.class.isAssignableFrom((Class<?>) rawType)) {
             JavaType javaType = mapper.getTypeFactory()
-                                      .constructParametrizedType(LinkedHashMap.class, Map.class, rt, Object.class);
+                .constructParametrizedType(LinkedHashMap.class, Map.class, rt, Object.class);
             value = mapper.readValue(valueNode.toString(), javaType);
           } else {
             JavaType javaType = mapper.getTypeFactory()
-                                      .constructParametrizedType(LinkedHashMap.class, Map.class, rt, Object.class);
+                .constructParametrizedType(LinkedHashMap.class, Map.class, rt, Object.class);
             Map<String, Object> result = mapper.readValue(valueNode.toString(), javaType);
             value = ClassUtil.createInstance(rawType, result);
           }
