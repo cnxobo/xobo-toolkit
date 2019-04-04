@@ -1,6 +1,7 @@
 package org.xobo.toolkit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -22,6 +23,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import javax.crypto.Cipher;
+import org.apache.commons.io.IOUtils;
 
 public class RsaUtil {
 
@@ -78,7 +80,9 @@ public class RsaUtil {
   public static PrivateKey loadPrivateKey(String privateKeyContent)
       throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, URISyntaxException {
     privateKeyContent = privateKeyContent.replaceAll("\\n", "")
-        .replace("-----BEGIN RSA PRIVATE KEY-----", "").replace("-----END RSA PUBLIC KEY-----", "");
+        .replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
+        .replace("-----BEGIN RSA PRIVATE KEY-----", "")
+        .replace("-----END RSA PRIVATE KEY-----", "");
     KeyFactory kf = KeyFactory.getInstance("RSA");
     PKCS8EncodedKeySpec keySpecPKCS8 =
         new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(privateKeyContent));
@@ -90,7 +94,9 @@ public class RsaUtil {
   public static RSAPublicKey loadPublicKey(String publicKeyContent)
       throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, URISyntaxException {
     publicKeyContent = publicKeyContent.replaceAll("\\n", "")
-        .replace("-----BEGIN RSA PUBLIC KEY-----", "").replace("-----END RSA PUBLIC KEY-----", "");;
+        .replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "")
+        .replace("-----BEGIN RSA PUBLIC KEY-----", "")
+        .replace("-----END RSA PUBLIC KEY-----", "");;
 
     KeyFactory kf = KeyFactory.getInstance("RSA");
 
@@ -102,31 +108,32 @@ public class RsaUtil {
 
   public static void main(String... argv) throws Exception {
     // First generate a public/private key pair
-    KeyPair pair = generateKeyPair();
+    // KeyPair pair = generateKeyPair();
     // KeyPair pair = getKeyPairFromKeyStore();
 
-    String priKey = write(pair.getPrivate());
-    String pubKey = write(pair.getPublic());
-    System.out.println(priKey);
-    System.out.println();
-    System.out.println(pubKey);
+    PrivateKey privateKey = RsaUtil.loadPrivateKey(
+        IOUtils
+            .toString(new FileReader("/Users/Bing/Downloads/testRsa/rsa_private_key_pkcs8.pem")));
+
+    PublicKey publicKey = RsaUtil.loadPublicKey(
+        IOUtils.toString(new FileReader("/Users/Bing/Downloads/testRsa/public.pem")));
 
     // Our secret message
     String message = "the answer to life the universe and everything";
 
     // Encrypt the message
-    String cipherText = encrypt(message, pair.getPublic());
+    String cipherText = encrypt(message, publicKey);
 
     // Now decrypt it
-    String decipheredMessage = decrypt(cipherText, pair.getPrivate());
+    String decipheredMessage = decrypt(cipherText, privateKey);
 
     System.out.println(decipheredMessage);
 
     // Let's sign our message
-    String signature = sign("foobar", pair.getPrivate());
+    String signature = sign("foobar", privateKey);
 
     // Let's check the signature
-    boolean isCorrect = verify("foobar", signature, pair.getPublic());
+    boolean isCorrect = verify("foobar", signature, publicKey);
     System.out.println("Signature correct: " + isCorrect);
 
   }
