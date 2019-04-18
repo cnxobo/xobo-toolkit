@@ -130,31 +130,8 @@
     <url>https://github.com/cnxobo/toolkit/tree/master</url>
   </scm>
 
- <!--  <build>
+  <build>
     <plugins>
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.7</version>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>ossrh</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
@@ -167,56 +144,42 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.5</version>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
- -->
-<!--   <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement> -->
-  
+
+  <!-- <build> <plugins> <plugin> <groupId>org.sonatype.plugins</groupId> <artifactId>nexus-staging-maven-plugin</artifactId> 
+    <version>1.6.7</version> <extensions>true</extensions> <configuration> <serverId>ossrh</serverId> <nexusUrl>https://oss.sonatype.org/</nexusUrl> 
+    <autoReleaseAfterClose>true</autoReleaseAfterClose> </configuration> </plugin> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+    <artifactId>maven-javadoc-plugin</artifactId> <executions> <execution> <id>attach-javadocs</id> <goals> <goal>jar</goal> 
+    </goals> </execution> </executions> </plugin> <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-gpg-plugin</artifactId> 
+    <version>1.5</version> <executions> <execution> <id>sign-artifacts</id> <phase>verify</phase> <goals> <goal>sign</goal> </goals> 
+    </execution> </executions> </plugin> </plugins> </build> -->
+  <!-- <distributionManagement> <snapshotRepository> <id>ossrh</id> <url>https://oss.sonatype.org/content/repositories/snapshots</url> 
+    </snapshotRepository> <repository> <id>ossrh</id> <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url> 
+    </repository> </distributionManagement> -->
+
   <distributionManagement>
-		<repository>
-			<id>ezy-deployment</id>
-			<name>Internal Releases</name>
-			<url>http://172.16.0.13:8081/repository/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>ezy-deployment</id>
-			<name>Internal Releases</name>
-			<url>http://172.16.0.13:8081/repository/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
-	<repositories>
-		<repository>
-			<id>ezy-repository</id>
-			<url>http://172.16.0.13:8081/repository/public/</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>ezy-repository</id>
-			<url>http://172.16.0.13:8081/repository/public/</url>
-		</pluginRepository>
-	</pluginRepositories>
+    <repository>
+      <id>ezy-deployment</id>
+      <name>Internal Releases</name>
+      <url>http://172.16.0.13:8081/repository/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>ezy-deployment</id>
+      <name>Internal Releases</name>
+      <url>http://172.16.0.13:8081/repository/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+  <repositories>
+    <repository>
+      <id>ezy-repository</id>
+      <url>http://172.16.0.13:8081/repository/public/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>ezy-repository</id>
+      <url>http://172.16.0.13:8081/repository/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
 </project>
