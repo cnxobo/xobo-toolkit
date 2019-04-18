@@ -1,19 +1,13 @@
 package org.xobo.toolkit;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NumericNode;
-import com.google.common.collect.Lists;
 
 public class JsonNodeSerializeUtil {
 
@@ -95,10 +89,10 @@ public class JsonNodeSerializeUtil {
       }
 
       String nodeValue = null;
-      if (propNode == null) {
-        nodeValue = propNode == null ? "" : propNode.asText("");
-      } else if (propNode instanceof NumericNode) {
+      if (propNode instanceof NumericNode) {
         nodeValue = NumberParser.format(propNode.decimalValue(), "#.#####");
+      } else {
+        nodeValue = propNode == null ? "" : propNode.asText("");
       }
 
       builder.append(prop).append("=").append(nodeValue);
