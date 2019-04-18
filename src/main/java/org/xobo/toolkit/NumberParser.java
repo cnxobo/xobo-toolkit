@@ -1,8 +1,8 @@
 package org.xobo.toolkit;
 
 import org.apache.commons.lang3.StringUtils;
-
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -103,6 +103,18 @@ public class NumberParser {
       }
     }
     return list;
+  }
+
+  public static String format(Object number, String pattern) {
+    DecimalFormat decimalFormat = new DecimalFormat(pattern);
+    return decimalFormat.format(number);
+  }
+
+  public static void main(String[] args) {
+    System.out.println(format(0.1, "#.#####"));
+    System.out.println(format(1, "#.#####"));
+    System.out.println(format(1.1, "#.#####"));
+    System.out.println(format(1.000005, "#.#####"));
   }
 
   private static Pattern PATTERN_FLOAT = Pattern.compile("([+-]?\\d[\\d,]*\\.\\d+)");
