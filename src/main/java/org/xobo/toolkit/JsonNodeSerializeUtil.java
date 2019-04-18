@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NumericNode;
 import com.google.common.collect.Lists;
 
 public class JsonNodeSerializeUtil {
@@ -92,7 +93,14 @@ public class JsonNodeSerializeUtil {
       } else {
         started = true;
       }
-      String nodeValue = propNode == null ? "" : propNode.asText("");
+
+      String nodeValue = null;
+      if (propNode == null) {
+        nodeValue = propNode == null ? "" : propNode.asText("");
+      } else if (propNode instanceof NumericNode) {
+        nodeValue = NumberParser.format(propNode.decimalValue(), "#.#####");
+      }
+
       builder.append(prop).append("=").append(nodeValue);
     }
     return started;
@@ -105,56 +113,6 @@ public class JsonNodeSerializeUtil {
       started = jsonNodeToStr(builder, jsonNode, props, started);
     }
     return started;
-  }
-
-  public static void main(String[] args) throws Exception {
-    System.out.println(
-        toList("[queryList,bizId,taskNo,[queryList,bizId,[queryList,bizId,taskNo,]taskNo,]]"));
-  }
-
-  @SuppressWarnings("unused")
-  public static void test1(String[] args) throws Exception {
-    List<String> props =
-        Lists.newArrayList("name", "username", "[depts", "id", "deptName", "deptCode", "]",
-            "address");
-
-    Map<String, Object> result = new HashMap<>();
-    result.put("name", "ZHOU Bing");
-    result.put("username", "xobo");
-    result.put("address", "源深路1088号平安财富大厦裙楼3楼智阳网络技术有限公司");
-
-    List<Map<String, Object>> depts = new ArrayList<>();
-    depts.add(createDept(1, "D0001", "dept01"));
-    depts.add(createDept(2, "D0002", "dept02"));
-    depts.add(createDept(3, "D0003", "dept03"));
-
-    result.put("depts", depts);
-
-    PrivateKey privateKey = RsaUtil.loadPrivateKey(
-        IOUtils.toString(
-            JsonNodeSerializeUtil.class.getResource("/cert/privateKey.txt").openStream()));
-
-    PublicKey publicKey = RsaUtil.loadPublicKey(
-        IOUtils
-            .toString(JsonNodeSerializeUtil.class.getResource("/cert/publicKey.txt").openStream()));
-
-    System.out.println(JSONUtil.toJSON(result));
-    JsonNode jsonNode = JSONUtil.toJsonNode(result);
-    StringBuilder builder = new StringBuilder();
-    jsonNodeToStr(builder, jsonNode, props, false);
-    String plainText = builder.toString();
-    System.out.println(plainText);
-    String signature = RsaUtil.sign(plainText, privateKey);
-    System.out.println(signature);
-  }
-
-
-  static Map<String, Object> createDept(int deptId, String deptCode, String deptName) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("id", deptId);
-    result.put("deptCode", deptCode);
-    result.put("deptName", deptName);
-    return result;
   }
 
 }

@@ -113,7 +113,7 @@ public class RsaUtil {
 
     PrivateKey privateKey = RsaUtil.loadPrivateKey(
         IOUtils
-            .toString(new FileReader("/Users/Bing/Downloads/testRsa/rsa_private_key_pkcs8.pem")));
+            .toString(new FileReader("/Users/Bing/Downloads/testRsa/private.pem")));
 
     PublicKey publicKey = RsaUtil.loadPublicKey(
         IOUtils.toString(new FileReader("/Users/Bing/Downloads/testRsa/public.pem")));
