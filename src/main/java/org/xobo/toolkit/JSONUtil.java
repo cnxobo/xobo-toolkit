@@ -182,7 +182,7 @@ public class JSONUtil {
    */
   public static Map<String, Object> toMap(Object obj) {
     ObjectMapper mapper = buildObjectMapper();
-    JavaType javaType = mapper.getTypeFactory().constructParametrizedType(LinkedHashMap.class,
+    JavaType javaType = mapper.getTypeFactory().constructParametricType(LinkedHashMap.class,
         Map.class, String.class, Object.class);
     Map<String, Object> props = mapper.convertValue(obj, javaType);
     return props;
@@ -202,8 +202,8 @@ public class JSONUtil {
     }
     ObjectMapper mapper = buildObjectMapper();
     try {
-      JavaType javaType = mapper.getTypeFactory().constructParametrizedType(LinkedHashMap.class,
-          Map.class, String.class, Object.class);
+      JavaType javaType =
+          mapper.getTypeFactory().constructParametricType(LinkedHashMap.class, String.class, Object.class);
       return mapper.readValue(json, javaType);
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -231,6 +231,15 @@ public class JSONUtil {
     ObjectMapper mapper = buildObjectMapper();
     try {
       return mapper.readValue(json, clazz);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static <T> T toObject(Object fromValue, Class<T> toValueType) {
+    ObjectMapper mapper = buildObjectMapper();
+    try {
+      return mapper.convertValue(fromValue, toValueType);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
