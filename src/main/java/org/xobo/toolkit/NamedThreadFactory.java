@@ -2,7 +2,6 @@ package org.xobo.toolkit;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.lang3.StringUtils;
 
 public class NamedThreadFactory implements ThreadFactory {
   private static final AtomicInteger poolNumber = new AtomicInteger(1);

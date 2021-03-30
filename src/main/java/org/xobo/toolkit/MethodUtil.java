@@ -1,7 +1,6 @@
 package org.xobo.toolkit;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -17,7 +16,6 @@ import java.util.Map.Entry;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.springframework.util.ReflectionUtils;
 
-import com.bstek.dorado.data.provider.Page;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
@@ -33,41 +31,6 @@ public class MethodUtil {
   public static final int MATCH_BY_NAME = 1;
   public static final int MATCH_BY_ORDER = 2;
 
-
-  public static void main(String[] args)
-      throws InstantiationException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, SecurityException, NoSuchMethodException {
-
-
-    Map<String, Object> parameterMap = new HashMap<String, Object>();
-    parameterMap.put("pageSize", 10);
-    parameterMap.put("pageNo", 5);
-
-    List<String> list = new ArrayList<String>();
-    list.add("Bing");
-    list.add("Zhou");
-    parameterMap.put("userDepts", list);
-    parameterMap.put("list", list);
-    parameterMap.put("parameter", new HashMap<Object, Object>());
-
-    invokeMethod(new MethodUtil(), "testList", parameterMap);
-
-    System.out.println(ClassUtil.create(Page.class, parameterMap));
-
-    Object obj = JSONUtil.toObject("[1,2,3,\"Bing\"]");
-    System.out.println(obj);
-    Class<?> page = Page.class;
-    Constructor<?>[] constructors = page.getConstructors();
-    for (Constructor<?> constructor : constructors) {
-      System.out.println(constructor);
-      String[] params = paranamer.lookupParameterNames(constructor, false);
-      for (String string : params) {
-        System.out.println(string);
-      }
-    }
-
-
-  }
 
   /**
    * 反射调用指定方法
