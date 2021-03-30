@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -244,17 +243,17 @@ public class MethodUtil {
         if (rawType instanceof Class<?>) {
           if (Collection.class.isAssignableFrom((Class<?>) rawType)) {
             if (typeArguments.length > 0) {
-              JavaType javaType = mapper.getTypeFactory().constructParametrizedType(ArrayList.class,
-                  List.class, rt);
+              JavaType javaType =
+                  mapper.getTypeFactory().constructParametricType(ArrayList.class, rt);
               value = mapper.readValue(valueNode.toString(), javaType);
             }
           } else if (Map.class.isAssignableFrom((Class<?>) rawType)) {
             JavaType javaType = mapper.getTypeFactory()
-                .constructParametrizedType(LinkedHashMap.class, Map.class, rt, Object.class);
+                .constructParametricType(LinkedHashMap.class, rt, Object.class);
             value = mapper.readValue(valueNode.toString(), javaType);
           } else {
             JavaType javaType = mapper.getTypeFactory()
-                .constructParametrizedType(LinkedHashMap.class, Map.class, rt, Object.class);
+                .constructParametricType(LinkedHashMap.class, rt, Object.class);
             Map<String, Object> result = mapper.readValue(valueNode.toString(), javaType);
             value = ClassUtil.createInstance(rawType, result);
           }
