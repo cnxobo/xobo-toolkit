@@ -1,7 +1,7 @@
 package org.xobo.toolkit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import java.io.FileReader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -22,8 +22,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+
 import javax.crypto.Cipher;
-import org.apache.commons.io.IOUtils;
 
 public class RsaUtil {
 
@@ -104,38 +104,6 @@ public class RsaUtil {
         new X509EncodedKeySpec(Base64.getMimeDecoder().decode(publicKeyContent));
     RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
     return pubKey;
-  }
-
-  public static void main(String... argv) throws Exception {
-    // First generate a public/private key pair
-    // KeyPair pair = generateKeyPair();
-    // KeyPair pair = getKeyPairFromKeyStore();
-
-    PrivateKey privateKey = RsaUtil.loadPrivateKey(
-        IOUtils
-            .toString(new FileReader("/Users/Bing/Downloads/testRsa/private.pem")));
-
-    PublicKey publicKey = RsaUtil.loadPublicKey(
-        IOUtils.toString(new FileReader("/Users/Bing/Downloads/testRsa/public.pem")));
-
-    // Our secret message
-    String message = "the answer to life the universe and everything";
-
-    // Encrypt the message
-    String cipherText = encrypt(message, publicKey);
-
-    // Now decrypt it
-    String decipheredMessage = decrypt(cipherText, privateKey);
-
-    System.out.println(decipheredMessage);
-
-    // Let's sign our message
-    String signature = sign("foobar", privateKey);
-
-    // Let's check the signature
-    boolean isCorrect = verify("foobar", signature, publicKey);
-    System.out.println("Signature correct: " + isCorrect);
-
   }
 
   public static String sign(String plainText, PrivateKey privateKey) throws Exception {
