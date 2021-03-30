@@ -1,32 +1,44 @@
 package org.xobo.toolkit;
 
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.NumberToTextConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xobo.toolkit.model.ExcelHeader;
 
 public class ExcelReaderUtil {
   private static Logger logger = LoggerFactory.getLogger(ExcelReaderUtil.class);
 
-  private final static String xls = "xls";
-  private final static String xlsx = "xlsx";
-
   @SuppressWarnings("unchecked")
-  public static <T> T create(Class<T> clazz) {
+  private static <T> T create(Class<T> clazz) {
     if (Map.class.equals(clazz)) {
       clazz = (Class<T>) HashMap.class;
     }
@@ -37,44 +49,24 @@ public class ExcelReaderUtil {
     }
   }
 
-  public static Workbook getWorkBook(File file) {
-    // 获得文件名
-    String fileName = file.getName();
-    // 创建Workbook工作薄对象，表示整个excel
+  public static Workbook getWorkBook(InputStream inputStream) {
     Workbook workbook = null;
     try {
-      // 获取excel文件的io流
-      InputStream is = new FileInputStream(file);
-      // 根据文件后缀名不同(xls和xlsx)获得不同的Workbook实现类对象
-      if (fileName.endsWith(xls)) {
-        // 2003
-        workbook = new HSSFWorkbook(is);
-      } else if (fileName.endsWith(xlsx)) {
-        // 2007
-        workbook = new XSSFWorkbook(is);
-      }
-    } catch (IOException e) {
-      logger.info(e.getMessage());
+      workbook = WorkbookFactory.create(inputStream);
+    } catch (IOException | EncryptedDocumentException | InvalidFormatException e) {
+      logger.error(e.getMessage());
+      throw new RuntimeException(e);
     }
     return workbook;
   }
 
-  public static Workbook getWorkBook(InputStream is, String fileName) {
-    // 获得文件名
-    // 创建Workbook工作薄对象，表示整个excel
+  public static Workbook getWorkBook(File file) {
     Workbook workbook = null;
     try {
-      // 获取excel文件的io流
-      // 根据文件后缀名不同(xls和xlsx)获得不同的Workbook实现类对象
-      if (fileName.endsWith(xls)) {
-        // 2003
-        workbook = new HSSFWorkbook(is);
-      } else if (fileName.endsWith(xlsx)) {
-        // 2007
-        workbook = new XSSFWorkbook(is);
-      }
-    } catch (IOException e) {
-      logger.info(e.getMessage());
+      workbook = WorkbookFactory.create(file);
+    } catch (IOException | EncryptedDocumentException | InvalidFormatException e) {
+      logger.error(e.getMessage());
+      throw new RuntimeException(e);
     }
     return workbook;
   }
@@ -84,22 +76,21 @@ public class ExcelReaderUtil {
   }
 
   public static List<List<String>> toList(File file, int sheetIndex, int startIndex)
-    throws IOException {
+      throws IOException {
     return toList(file, sheetIndex, startIndex, -1);
   }
 
   public static List<List<String>> toList(File file, int sheetIndex, int startIndex, int endIndex)
-    throws IOException {
+      throws IOException {
     try (InputStream is = new FileInputStream(file)) {
-      Workbook workbook = getWorkBook(is, file.getName());
+      Workbook workbook = getWorkBook(is);
       return toList(workbook, sheetIndex, startIndex, endIndex);
     }
   }
 
-  public static List<List<String>> toList(String filename, InputStream is, int sheetIndex,
-    int startIndex, int endIndex)
-    throws IOException {
-    Workbook workbook = getWorkBook(is, filename);
+  public static List<List<String>> toList(InputStream is, int sheetIndex, int startIndex,
+      int endIndex) throws IOException {
+    Workbook workbook = getWorkBook(is);
     return toList(workbook, sheetIndex, startIndex, endIndex);
   }
 
@@ -112,8 +103,7 @@ public class ExcelReaderUtil {
    * @throws IOException
    */
   public static List<List<String>> toList(Workbook workbook, int sheetIndex, int startIndex,
-    int endIndex)
-    throws IOException {
+      int endIndex) throws IOException {
     // 创建返回对象，把每行中的值作为一个数组，所有行作为一个集合返回
     List<List<String>> sheetList = new ArrayList<>();
     if (workbook != null) {
@@ -133,13 +123,14 @@ public class ExcelReaderUtil {
         }
         // 获得当前行的开始列
         int firstCellNum = row.getFirstCellNum();
-        // 获得当前行的列数
-        int lastCellNum = row.getPhysicalNumberOfCells();
+        // 获得当前行最后一列列数
+        int lastCellNum = row.getLastCellNum();
+        
         List<String> rowValues = new ArrayList<>(lastCellNum);
         // 循环当前行
         for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
           Cell cell = row.getCell(cellNum);
-          rowValues.add(ExcelUtils.getCellValue(cell));
+          rowValues.add(getCellValue(cell));
         }
         sheetList.add(rowValues);
       }
@@ -149,25 +140,22 @@ public class ExcelReaderUtil {
 
   @SuppressWarnings("rawtypes")
   public static List<Map> toMap(File file, int sheetIndex, int startIndex, int endIndex,
-    String[] properties)
-    throws IOException {
+      String[] properties) throws IOException {
     return toPOJO(file, sheetIndex, startIndex, endIndex, Map.class, properties);
   }
 
   @SuppressWarnings("rawtypes")
-  public static List<Map> toMap(File file, String[] properties)
-    throws IOException {
+  public static List<Map> toMap(File file, String[] properties) throws IOException {
     return toMap(file, 0, 1, -1, properties);
   }
 
 
-  public static <T> List<T> toPOJO(File file, int sheetIndex, int startIndex,
-    int endIndex, Class<T> clazz, Map<Integer, String> propertyMap)
-    throws IOException {
+  public static <T> List<T> toPOJO(File file, int sheetIndex, int startIndex, int endIndex,
+      Class<T> clazz, Map<Integer, String> propertyMap) throws IOException {
 
     List<List<String>> sheetList = null;
     try (InputStream is = new FileInputStream(file)) {
-      Workbook workbook = getWorkBook(is, file.getName());
+      Workbook workbook = getWorkBook(is);
       sheetList = toList(workbook, sheetIndex, startIndex, endIndex);
     }
 
@@ -198,7 +186,7 @@ public class ExcelReaderUtil {
   }
 
   public static <T> List<T> toPOJO(File file, int sheetIndex, int startIndex, int endIndex,
-    Class<T> clazz, String[] properties) throws IOException {
+      Class<T> clazz, String[] properties) throws IOException {
     Map<Integer, String> propertyMap = new HashMap<>();
     for (int i = 0; i < properties.length; i++) {
       propertyMap.put(i, properties[i]);
@@ -206,5 +194,74 @@ public class ExcelReaderUtil {
     return toPOJO(file, sheetIndex, startIndex, endIndex, clazz, propertyMap);
   }
 
+  public static List<ExcelHeader> loadExcelHeadList(File file, int startRow) {
+    try {
+      return loadExcelHeadList(new FileInputStream(file), startRow);
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static List<ExcelHeader> loadExcelHeadList(InputStream is, int startRow) {
+    List<List<String>> result = null;
+    try (InputStream inputStream = new BufferedInputStream(is)) {
+      result = ExcelReaderUtil.toList(inputStream, 0, startRow, startRow + 1);
+      if (result.isEmpty()) {
+        return null;
+      }
+
+      List<ExcelHeader> excelHeaderList = new ArrayList<>();
+      List<String> row = result.get(0);
+      List<String> valueRow = result.size() > 1 ? result.get(1) : row;
+      for (int i = 0; i < row.size(); i++) {
+        excelHeaderList.add(new ExcelHeader(i, row.get(i), valueRow.get(i)));
+      }
+      return excelHeaderList;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static String getCellValue(Cell cell) {
+    String ret = "";
+    if (cell == null) {
+      return ret;
+    }
+    switch (cell.getCellTypeEnum()) {
+      case BLANK:
+        ret = "";
+        break;
+      case BOOLEAN:
+        ret = String.valueOf(cell.getBooleanCellValue());
+        break;
+      case ERROR:
+        ret = null;
+        break;
+      case FORMULA:
+        Workbook wb = cell.getSheet().getWorkbook();
+        CreationHelper crateHelper = wb.getCreationHelper();
+        FormulaEvaluator evaluator = crateHelper.createFormulaEvaluator();
+        ret = getCellValue(evaluator.evaluateInCell(cell));
+        break;
+      case NUMERIC:
+        if (DateUtil.isCellDateFormatted(cell)) {
+          Date theDate = cell.getDateCellValue();
+          DateFormat format = new SimpleDateFormat(DATE_OUTPUT_PATTERNS);
+          ret = format.format(theDate);
+        } else {
+          ret = NumberToTextConverter.toText(cell.getNumericCellValue());
+        }
+        break;
+      case STRING:
+        ret = cell.getRichStringCellValue().getString();
+        break;
+      default:
+        ret = null;
+    }
+
+    return null != ret ? ret.trim() : null; // 有必要自行trim
+  }
+
+  public final static String DATE_OUTPUT_PATTERNS = "yyyy-MM-dd HH:mm:ss";
 
 }
