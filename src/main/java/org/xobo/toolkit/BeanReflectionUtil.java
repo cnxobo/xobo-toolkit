@@ -1,13 +1,22 @@
 package org.xobo.toolkit;
 
-import javassist.util.proxy.ProxyObject;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.aop.SpringProxy;
+import org.springframework.beans.BeanUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Proxy;
-import java.util.*;
+import javassist.util.proxy.ProxyObject;
 
 public class BeanReflectionUtil {
 
@@ -41,6 +50,26 @@ public class BeanReflectionUtil {
     return clazz;
   }
 
+  public static Object getProperty(Object bean, String propertyName) {
+    PropertyDescriptor propertyDescriptor =
+        BeanUtils.getPropertyDescriptor(bean.getClass(), propertyName);
+    try {
+      return propertyDescriptor.getReadMethod().invoke(bean);
+    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static Object setProperty(Object bean, String propertyName, Object value) {
+    PropertyDescriptor propertyDescriptor =
+        BeanUtils.getPropertyDescriptor(bean.getClass(), propertyName);
+    try {
+      return propertyDescriptor.getWriteMethod().invoke(bean, value);
+    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public static boolean hasClass(String className) {
     try {
       Class.forName(className);
@@ -69,7 +98,7 @@ public class BeanReflectionUtil {
   }
 
   public static void mergeObjectWithAppointedProperties(Object target, Object source,
-    String[] properties) {
+      String[] properties) {
     for (String property : properties) {
       try {
         Object targetValue = PropertyUtils.getProperty(target, property);
