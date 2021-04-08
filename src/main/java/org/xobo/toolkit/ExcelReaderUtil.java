@@ -18,7 +18,6 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -125,7 +124,7 @@ public class ExcelReaderUtil {
         int firstCellNum = row.getFirstCellNum();
         // 获得当前行最后一列列数
         int lastCellNum = row.getLastCellNum();
-        
+
         List<String> rowValues = new ArrayList<>(lastCellNum);
         // 循环当前行
         for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
