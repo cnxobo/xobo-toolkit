@@ -46,9 +46,8 @@ public class DateUtil {
     try {
       return sdf.parse(str);
     } catch (ParseException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
-    return null;
   }
 
   /**
