@@ -8,8 +8,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<jackson.version>2.12.2</jackson.version>
 	</properties>
 
@@ -133,25 +133,22 @@
 		</repository> </distributionManagement> -->
 
 	<repositories>
-		<repository>
-			<id>ezhiyang</id>
-			<url>https://nexus.zyde.vip/repository/public/</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>ezhiyang</id>
-			<url>https://nexus.zyde.vip/repository/public/</url>
-		</pluginRepository>
-	</pluginRepositories>
-	<distributionManagement>
-		<repository>
-			<id>ezhiyang-deployment</id>
-			<url>https://nexus.zyde.vip/repository/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>ezhiyang-deployment</id>
-			<url>https://nexus.zyde.vip/repository/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <repository>
+      <id>xobo-repo</id>
+      <name>Nexus Release Repository</name>
+      <url>https://nexus.xobo.org/content/groups/public/</url>
+    </repository>
+  </repositories>
+  <distributionManagement>
+    <repository>
+      <id>xobo-repo</id>
+      <name>Nexus Release Repository</name>
+      <url>https://nexus.xobo.org/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>xobo-repo</id>
+      <name>Nexus Snapshot Repository</name>
+      <url>https://nexus.xobo.org/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>
